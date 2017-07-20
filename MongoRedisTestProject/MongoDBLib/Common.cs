@@ -35,8 +35,7 @@ namespace TestProject.MongoDBLib
             var collection = mongoClient.GetDatabase(DBName).GetCollection<T>(collectionName);
             return collection;
         }
-
-
+                        
         static IMongoClient GetDBClient(string connectString)
         {
             try
@@ -53,5 +52,11 @@ namespace TestProject.MongoDBLib
                 return null;
             }
         }
+
+
+
+
+
+        
     }
 }
