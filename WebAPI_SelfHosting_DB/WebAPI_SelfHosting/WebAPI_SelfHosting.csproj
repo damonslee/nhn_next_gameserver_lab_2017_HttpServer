@@ -115,6 +115,7 @@
     <Compile Include="Request\LoadBasicGameData.cs" />
     <Compile Include="Request\Login.cs" />
     <Compile Include="Request\RequestLock.cs" />
+    <Compile Include="Request\RequestLockVer2.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>

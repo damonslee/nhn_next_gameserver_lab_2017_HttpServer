@@ -61,8 +61,8 @@ namespace TestProject
             try
             {
                 var redis = new RedisString<T>(redisGroupBasic, key);
-                await redis.Set(dataObject);
-                return true;
+                var result = await redis.Set(dataObject);
+                return result;
             }
             catch (Exception ex)
             {
@@ -212,21 +212,28 @@ namespace TestProject
             }
         }
 
-
-
-        //static void WriteLog(string msg)
-        //{
-        //    WriteLogFunc(msg);
-        //}
-
-        //static Action<string> WriteLogFunc = null;
-        //public static void SetWriteLogFunc(Action<string> func)
-        //{
-        //    WriteLogFunc = func;
-        //}
+        //redis setnx
+        //http://kwoncharlie.blog.me/220397493852 
+        //https://github.com/StackExchange/StackExchange.Redis/search?utf8=%E2%9C%93&q=setnx
+        public static async Task<bool> SetStringAsyncWhenNotExists<T>(string key, T dataObject)
+        {
+            try
+            {
+                var redis = new RedisString<T>(redisGroupBasic, key);
+                var result = await redis.Set(dataObject, null, StackExchange.Redis.When.NotExists);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
 
         
 
-       
+
+
+
     }
 }

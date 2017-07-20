@@ -9,53 +9,36 @@ using System.Runtime.CompilerServices;
 // 클라이언트의 요청을 순차적으로 처리하도록 한다.
 namespace WebAPI_SelfHosting.Request
 {
-    public class RequestLock : IDisposable
+    public struct RequestLockVer2 : IDisposable
     {
-        ERROR_CODE 요청을_할수있다 = ERROR_CODE.PREV_REQUEST_NOT_COMPLETE;
+        ERROR_CODE 요청을_할수있다;
+        //ERROR_CODE 요청을_할수있다 = ERROR_CODE.PREV_REQUEST_NOT_COMPLETE;
         string key;
 
-        public RequestLock(string id)
+        public RequestLockVer2(string id, ERROR_CODE errorCode= ERROR_CODE.PREV_REQUEST_NOT_COMPLETE)
         {
-            key = string.Format("{0}:AT", id);
+            key = string.Format("{0}:RLock", id);
+            요청을_할수있다 = errorCode;
         }
 
         public void Release()
         {
-            DB.Redis.SetStringNoReturn<double>(key, 0);
+            DB.Redis.DeleteStringNoReturn<int>(key);
         }
 
         public async Task<ERROR_CODE> 요청_처리중인가([System.Runtime.CompilerServices.CallerFilePath] string fileName = "",
                                 [System.Runtime.CompilerServices.CallerMemberName] string methodName = "",
                                 [System.Runtime.CompilerServices.CallerLineNumber] int lineNumber = 0)
         {
-            double prevAllTimeSec = 0;
-            var curAllTimeSec = TimeTickToSec(DateTime.Now.Ticks);
-
             try
             {
-                var result = await DB.Redis.GetStringAsync<double>(key);
-                
-                if (result.Item1)
-                {
-                    prevAllTimeSec = result.Item2;
+                var result = await DB.Redis.SetStringAsyncWhenNotExists<int>(key, 12345);
 
-                    if (prevAllTimeSec > 0)
-                    {
-                        return 요청을_할수있다;
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("[RequestLock] 처음 요청");
-                    DB.Redis.SetStringAsync<double>(key, 0).Wait();
-                }
-
-                var changeData = DB.Redis.Increment(key, curAllTimeSec);
-                if (changeData != curAllTimeSec)
+                if (result == false)
                 {
                     return 요청을_할수있다;
                 }
-
+               
                 요청을_할수있다 = ERROR_CODE.NONE;
                 return 요청을_할수있다;
             }
@@ -63,7 +46,7 @@ namespace WebAPI_SelfHosting.Request
             {
                 Console.WriteLine("[RequestLock] 예외발생: " + ex.Message);
                 return ERROR_CODE.PREV_REQUEST_FAIL_REDIS;
-            }
+            }            
         }
 
         public void Dispose()
@@ -72,13 +55,6 @@ namespace WebAPI_SelfHosting.Request
             {
                 Release();
             }
-        }
-
-        Int64 TimeTickToSec(Int64 curTimeTick)
-        {
-            Int64 sec = (Int64)(curTimeTick / TimeSpan.TicksPerSecond);
-            return sec;
-        }
-
+        }       
     }
 }

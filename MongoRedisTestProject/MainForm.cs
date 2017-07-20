@@ -132,8 +132,16 @@ namespace TestProject
 
                 if (string.IsNullOrEmpty(textBoxRedisTestString.Text) == false)
                 {
-                    await RedisLib.SetString<string>(REDIS_STRING_KEY, textBoxRedisTestString.Text);
-                    DevLog.Write(string.Format("String Set. {0} : {1}", REDIS_STRING_KEY, textBoxRedisTestString.Text));
+                    if (checkBoxAlreadyExit.Checked == false)
+                    {
+                        var result = await RedisLib.SetString<string>(REDIS_STRING_KEY, textBoxRedisTestString.Text);
+                        DevLog.Write($"[{result}] String Set. {REDIS_STRING_KEY} : {textBoxRedisTestString.Text}");
+                    }
+                    else
+                    {
+                        var result = await RedisLib.SetStringAsyncWhenNotExists<string>(REDIS_STRING_KEY, textBoxRedisTestString.Text);
+                        DevLog.Write($"[{result}] String Set. {REDIS_STRING_KEY} : {textBoxRedisTestString.Text}");
+                    }
                 }
 
                 textBoxRedisTestInt.Text = textBoxRedisTestDouble.Text = textBoxRedisTestString.Text = "";
