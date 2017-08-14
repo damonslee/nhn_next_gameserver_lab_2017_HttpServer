@@ -14,15 +14,17 @@ namespace WebAPI_SelfHosting
         public static ERROR_CODE Init()
         {
             var error = ERROR_CODE.NONE;
-            
+
+            UniqueSeqNumberGenerator.Init(1, 1);
+
             error = InitDB();
             if (error != ERROR_CODE.NONE)
             {
                 Console.WriteLine(string.Format("Starting. Fail DB:{0}", error));
                 return error;
             }
-                        
-            EnableRequestHeathCheck = true;
+
+            EnableRequestHeathCheck = true ;
             return ERROR_CODE.NONE;
         }
 

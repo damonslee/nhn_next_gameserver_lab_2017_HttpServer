@@ -21,13 +21,13 @@ namespace WebAPI_SelfHosting.Request
                 return responseResult.Return(ERROR_CODE.REQ_CREATE_USER_INVALID_ID);
             }
 
-            var findUser = await Data.UserRepository.GetUser(requestPacket.UserID);
-            if (findUser != null)
+            var uid = await Data.UserRepository.AddUser(requestPacket.UserID, requestPacket.PW);
+
+            if (uid == 0)
             {
                 return responseResult.Return(ERROR_CODE.REQ_CREATE_USER_DUPLICATE_USER_ID);
             }
 
-            await Data.UserRepository.AddUser(requestPacket.UserID, requestPacket.PW);
             await Data.BasicGameRepository.AddGameData(requestPacket.UserID);
 
             responseResult.SetResult(ERROR_CODE.NONE);
